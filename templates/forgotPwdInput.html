@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+{%load static%}
+<html lang="en">
+<head>
+	<title>Login V3</title>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/png" href="{%static 'images/icons/favicon.ico'%}"/>
+ <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+<style>
+body {
+  background-image: url('{%static 'images/bg-01.jpg'%}');
+}
+.form-gap {
+    padding-top: 120px;
+}
+</style>
+</head>
+<body>
+
+	<div class="form-gap"></div>
+<div class="container">
+	<div class="row">
+		<div class="col-md-4 col-md-offset-4">
+            <div class="panel panel-default">
+              <div class="panel-body">
+                <div class="text-center">
+                  <h3><i class="fa fa-lock fa-4x"></i></h3>
+                  <h2 class="text-center">Set New Password?</h2>
+                  <p>Your new password must be different to previously used passwords </p>
+                  <div class="panel-body">
+                    <form action="/change-password" id="register-form" role="form" autocomplete="off" class="form" method="post">
+                        {% csrf_token %}
+                      <div class="form-group">
+                        <div class="input-group">
+                          <span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
+                          <input type="text" id="username" name="username" value="{{user_name}}" readonly>
+                        </div>
+                      </div>
+                        <div class="form-group">
+                        <div class="input-group">
+                           <span class="input-group-addon"><i class="glyphicon glyphicon-wrench"></i></span>
+                            <input type="password" name="new-password" placeholder="Enter New Password">
+                        </div>
+                        </div>
+                        <div class="form-group">
+                        <div class="input-group">
+                           <span class="input-group-addon"><i class="glyphicon glyphicon-wrench"></i></span>
+                            <input type="password" name="confirm-password" placeholder="Confirm Password">
+                        </div>
+                      </div>
+                      <div class="form-group">
+                        <input name="recover-submit" class="btn btn-lg btn-primary btn-block" value="Reset Password" type="submit">
+                      </div>
+
+                      <input type="hidden" class="hide" name="token" id="token" value="">
+                    </form>
+
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+	</div>
+</div>
+
+<!--===============================================================================================-->
+	<script src="{%static 'vendor/jquery/jquery-3.2.1.min.js'%}"></script>
+<!--===============================================================================================-->
+	<script src="{%static 'vendor/animsition/js/animsition.min.js'%}"></script>
+<!--===============================================================================================-->
+	<script src="{%static 'vendor/bootstrap/js/popper.js'%}"></script>
+	<script src="{%static 'vendor/bootstrap/js/bootstrap.min.js'%}"></script>
+<!--===============================================================================================-->
+	<script src="{%static 'vendor/select2/select2.min.js'%}"></script>
+<!--===============================================================================================-->
+	<script src="{%static 'vendor/daterangepicker/moment.min.js'%}"></script>
+	<script src="{%static 'vendor/daterangepicker/daterangepicker.js'%}"></script>
+<!--===============================================================================================-->
+	<script src="{%static 'vendor/countdowntime/countdowntime.js'%}"></script>
+<!--===============================================================================================-->
+	<script src="{%static 'js/main.js'%}"></script>
+
+</body>
+</html>

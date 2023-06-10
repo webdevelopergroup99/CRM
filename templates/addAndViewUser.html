@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+{%load static%}
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <title>User Creation</title>
+    <!-- Ajax -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+    <!-- JavaScript -->
+    <script src="#"></script>
+    <!-- Bootstrap CSS CDN -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <!-- Our Custom CSS -->
+    <link rel="stylesheet" href="{%static 'css/consignment.css'%}">
+    <!-- this script use to generate csrf ,,which we will send in ajax header-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+
+    <!-- <link rel="stylesheet" href="table.css"> -->
+
+    <!-- Link For Table Search and Filter -->
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.22/css/dataTables.bootstrap4.min.css">
+    <script src="https://cdn.datatables.net/1.10.22/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.22/js/dataTables.bootstrap4.min.js"></script>
+
+    <!-- Font Awesome JS -->
+    <script defer src="https://use.fontawesome.com/releases/v5.0.13/js/solid.js" integrity="sha384-tzzSw1/Vo+0N5UhStP3bvwWPq+uvzCMfrN1fEFe+xBmv1C/AtVX5K0uZtmcHitFZ" crossorigin="anonymous"></script>
+    <script defer src="https://use.fontawesome.com/releases/v5.0.13/js/fontawesome.js" integrity="sha384-6OIrr52G08NpOFSZdxxz1xdNSndlD4vdcf/q2myIUVO0VsqaGHJsB0RaBE01VTOY" crossorigin="anonymous"></script>
+
+    <style>
+        .loader {
+        position: fixed;
+        left: 0px;
+        top: 0px;
+        width: 100%;
+        height: 100%;
+        z-index: 9999;
+        background: url('/static/Bubble-Loading-Gif.gif') 50% 50% no-repeat rgb(249,249,249);
+        opacity: .8;
+        }
+    </style>
+
+</head>
+
+
+<body>
+    <div class="wrapper">
+        <!-- Sidebar  -->
+        <nav id="sidebar">
+            <div class="sidebar-header">
+                <h3><img src="" alt="Logo" style="height:60px;" class=""> RMA</h3>
+            </div>
+                <ul class="list-unstyled components">
+                    {% if 'user_id' in request.session %}
+                        <p>Welcome <big style="font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif; ">{{ request.session.user_id }}</big></p>
+                    {%endif%}
+                <li>
+                    <a href="#" class="active">Add & View User</a>
+                </li>
+                <li>
+                    <a href="#">Buy Edit</a>
+
+                </li>
+                <li>
+                    <a href="#">Sell Edit</a>
+
+                </li>
+                <li>
+                    <a href="#">Production Edit</a>
+
+                </li>
+            </ul>
+
+            <ul class="list-unstyled CTAs">
+                <li>
+                    <a href="{% url 'adminLogout'%}" class="download">Logout</a>
+                </li>
+
+            </ul>
+        </nav>
+
+        <div class="loader" style="display:none;" id="loader"></div>
+        <!-- Page Content  -->
+        <div id="content">
+
+            <nav class="navbar navbar-expand-lg navbar-light bg-light">
+                <div class="container-fluid">
+
+                    <button type="button" id="sidebarCollapse" class="btn btn-info" onclick=txt()>
+                        <i class="fas fa-align-left"></i>
+                        <span id="myspan">Close Menu</span>
+                    </button>
+                    <a class="nav-link text-danger" href="{% url 'adminLogout'%}" data-toggle="tooltip" title="Logout!" data-placement="top"><i class="fa fa-sign-out-alt"></i></a>
+                </div>
+            </nav>
+            <div class="row text-white bg-primary" style="padding-top:5px;">
+				<div class="col-6">
+                    <h4>Add & View User</h4>
+			    </div>
+				<div class="col-6"></div>
+            </div>
+            <div class="row" id="consignment_table" style="padding-top: 10px;">
+                <!-- <div class="col"> -->
+                    <!-- <div class="card bg-primary" style="width: 100%;"> -->
+                        <!-- <div class="card-header">
+                        </div> -->
+                        <div id="tableDiv" class="card-body bg-light">
+                            <table class="table-hover" id="sortTable" style="font-size: 10px;">
+                                <thead>
+                                    <tr>
+                                        <!-- For Consignment -->
+                                        <button type="button" class="btn btn-secondary float-right" title="Add New User" data-toggle="modal"  data-backdrop="static" data-keybord="false" data-target="#myModal" onclick="edit_consignment(this,0)">
+                                            <i class="fa fa-plus"></i>
+                                        </button>
+                                    </tr>
+                                    <tr>
+                                        <th>User Name</th>
+                                        <th>First Name</th>
+                                        <th>Last Name</th>
+                                        <th>Email</th>
+                                        <th>Last Login</th>
+                                        <th>Joined Date</th>
+                                        <th>Ph No</th>
+                                        <th>Birth Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for x in all_users %}
+                                   <tr>
+                                      <td >{{ x.username }}</td>
+                                      <td >{{ x.first_name }}</td>
+                                      <td >{{ x.last_name }}</td>
+                                       <td >{{ x.email }}</td>
+                                       <td >{{ x.last_login}}</td>
+                                       <td >{{ x.date_joined}}</td>
+                                       <td >{{ x.phone_number}}</td>
+                                       <td >{{ x.birthday}}</td>
+                                    </tr>
+                                      {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    <!-- </div> -->
+                <!-- </div> -->
+            </div>
+        </div>
+    </div>
+
+    <hr>
+    <!-- PAGE FOOTER -->
+    <footer class="text-center">
+        <div class="mb-2">
+          <small>
+            © 2023 Developed<i class="fa fa-heart" style="color:red"></i> by - <a target="_blank" href="https:google.com" class="text-info btn-link">
+            web developer group
+            </a>
+          </small>
+        </div>
+    </footer>
+    <!-- MODAL FOR Creating New Employee -->
+    <div class="modal fade" id="myModal">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary">
+                    <h4 class="modal-title text-white">Add User</h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="card" style="background-color: rgb(243, 242, 242);">
+                        <div class="card-body">
+                            <div id="Customer1" class="tabcontent">
+                                <!-- Consignor Details -->
+                                <table class="newentry text-dark" id="consignor_selection">
+                                    <tr>
+                                        <td>First Name</td>
+                                        <td><input type="text"  id="firstname" name="firstname" placeholder="Enter First Name" autocomplete="off"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Last Name</td>
+                                        <td><input  type="text" id="lastname" name="lastname" placeholder="Enter Last Name"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Email</td>
+                                        <td><input type="email" id="email" name="email" placeholder="Enter Email"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Contact No</td>
+                                        <td><input type="text" id="contact" name="contact" placeholder="Enter Contact No"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Birthday</td>
+                                        <td><input type="date" id="birthday" name="birthday" placeholder="Enter Birthdate"></td>
+                                    </tr>
+                                </table>
+
+                            </div>
+                          </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" id="save-customer">Submit</button>
+                    </div>
+                </div>
+            </div>
+    </div>
+    <!-- MODAL FOR Creating New Employee end -->
+	<!-- MODAL FOR display data start -->
+
+	<div class="modal fade" id="displayModal">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary">
+                    <h4 class="modal-title text-white">New Created User Credentials Login Password</h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="card" style="background-color: rgb(243, 242, 242);">
+                        <div class="card-body">
+                            <div id="Customer" class="tabcontent">
+                                <!-- Consignor Details -->
+                                <table class="newentry text-dark" id="consignor_selection1">
+											<tr>
+												<td>User Name</td>
+												<td>
+                                                    <div class="alert" style="color: #161816;background-color: #aee59b;">
+                                                        <span id="userDisplay" style="color:#4c4242;font-size: 20px;"></span>
+                                                    </div>
+                                                </td>
+											</tr>
+											<tr>
+												<td>Password</td>
+												<td>
+                                                    <div class="alert" style="color: #161816;background-color: #aee59b;">
+                                                         <span id="pwdDisplay" style="color:#4c4242;font-size: 20px;"></span>
+                                                    </div>
+                                                </td>
+											</tr>
+										</table>
+
+                            </div>
+                          </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+
+                    </div>
+                </div>
+            </div>
+    </div>
+</body>
+
+
+			<!-- MODAL FOR display data start -->
+
+
+
+    <!-- Popper.JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.0/umd/popper.min.js" integrity="sha384-cs/chFZiN24E4KMATLdqdvsezGxaGsi4hLGOzlXwp5UZB1LY//20VyM2taTB4QvJ" crossorigin="anonymous"></script>
+    <!-- Bootstrap JS -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js" integrity="sha384-uefMccjFJAIv6A+rW+L4AHf99KvxDjWSu1z9VI8SKNVmz4sk7buKt/6v9KI65qnm" crossorigin="anonymous"></script>
+
+    <!-- FOR NAVIGATION BAR OPEN CLOSE -->
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('#sidebarCollapse').on('click', function () {
+                $('#sidebar').toggleClass('active');
+            });
+        });
+
+          $('#sortTable').DataTable({
+            order: [[5, 'desc']],
+           });
+
+
+        function txt()
+        {
+            var myspan = document.getElementById('myspan');
+            var old=myspan.textContent
+            // alert (old)
+            if (old=="Close Menu") {
+                // alert (old)
+                document.getElementById("myspan").innerText="Open Menu"
+            }
+            else{
+                if (old=="Open Menu") {
+                    document.getElementById("myspan").innerText="Close Menu"
+                }
+            }
+        }
+
+    </script>
+     <!--End Navigation Bar JS -->
+    <!-- ================================================================================================================== -->
+</body>
+<script>
+    function removeTable(id)
+    {
+        var tbl = document.getElementById(id);
+        if(tbl) tbl.parentNode.removeChild(tbl);
+    }
+
+    // For Selecting Consignor and Consignee from Customer Modal
+$(function() {
+    $('#customer_table').on('click', 'tr', function () {
+    var value=$(this).find('td:first').html();
+    if(document.getElementById("customer-modal").innerHTML=='Consignor'){
+        $("#ConsignorID").val( $.trim(value));
+        consignor_refresh(document.getElementById('ConsignorID').value);
+
+    }
+    else{
+        $("#ConsigneeID").val( $.trim(value));
+        consignee_refresh(document.getElementById('ConsigneeID').value);
+    }
+    // passing value to Consignee table
+
+    // For close the modal
+    $('#selconsign').modal('toggle');
+    });
+
+
+$('#save-customer').click(function() {
+        console.log("ffffffffffffffffffffffffffffffffffffffff");
+         if( document.getElementById('firstname').value==''){
+             alert("First Name can't be blank!!!");
+         }else if(document.getElementById('lastname').value==''){
+             alert("Last Name can't be blank!!!");
+         }else if(! document.getElementById('birthday').value){
+              alert("Birth Date can't be blank!!!");
+         }
+         else{
+            var jsonData = {
+                                first_name : document.getElementById('firstname').value.toString(),
+                                last_name : document.getElementById('lastname').value.toString(),
+                                email : document.getElementById('email').value.toString(),
+                                phone_number : document.getElementById('contact').value.toString(),
+                                birthday : document.getElementById('birthday').value.toString(),
+                            };
+             console.log(jsonData);
+             $('#myModal').modal('hide');
+             document.getElementById('loader').style.display = "block";
+            //alert('stop');
+            $.ajax({
+                url: "{% url 'createUser' %}",
+                data: JSON.stringify(jsonData),
+                headers: { "X-CSRFToken": $.cookie("csrftoken") },
+                type: "POST",
+                dataType: "json",
+                success: function(data) {
+                    console.log("first json");
+                    console.log(data);
+                    refresh_customer_table();
+                    document.getElementById('loader').style.display = "none";
+                    $('#displayModal').modal('show');
+                    $("#userDisplay").text(data['user_name']);
+                    $("#pwdDisplay").text(data['user_password']);
+                    $('input[type="text"]').val('');
+                    $('input[type="email"]').val('');
+                    $('input[type="date"]').val('');
+
+                }
+            });
+      }
+
+
+
+});
+
+});
+
+
+// For Opening Modal
+function openModal(type){
+    if(type==1){
+        document.getElementById("customer-modal").innerHTML='Consignor';
+
+        }
+    else{
+        document.getElementById("customer-modal").innerHTML='Consignee';
+    }
+
+    $('#selconsign').modal({
+        backdrop: 'static',
+        keyboard: false
+    });
+}
+
+function refresh_customer_table(){
+    //base_url='/api/customer/all';
+	//var table = document.getElementById('sortTable');
+	//table.destroy();
+	$('#sortTable').DataTable().destroy();
+	removeTable('sortTable');
+
+    //var elem = document.getElementById("cust-search");
+    //elem.parentNode.removeChild(elem);
+    //document.getElementById('loader').style.display = "block";
+    console.log("sent to ajax")
+        $.ajax({
+                dataType: "json",
+                url: "{% url 'fetchUser' %}",
+                headers: { "X-CSRFToken": $.cookie("csrftoken") },
+                type: "GET",
+                success: function(data) {
+                console.log("success fetch")
+                console.log(data)
+                console.log("-------------")
+                console.log(data['response'].length)
+                var v = data['response'];
+                for(i=0;i<data['response'].length;i++){
+                console.log(data['response'][0]['email'])
+                }
+                html=''
+
+                html= html + '<table class="table-hover" style="font-size: 10px;" id="customer_table" >'
+                html= html + '<thead>'
+                html= html + '<tr>'
+                html= html + '<button type="button" class="btn btn-secondary float-right" title="Add New User" data-toggle="modal"  data-backdrop="static" data-keybord="false" data-target="#myModal" onclick="edit_consignment(this,0)">'
+                html= html + '<i class="fa fa-plus"></i>'
+                html= html + '</button>'
+                html= html + '</tr>'
+
+                html= html + '<tr>'
+                html= html + '<th>User Name</th>'
+                html= html + '<th>First Name</th>'
+                html= html + '<th>Last Name</th>'
+                html= html + '<th>Email</th>'
+                html= html + '<th>Last Login</th>'
+                html= html + '<th>Joined Date</th>'
+                html= html + '<th>Ph No</th>'
+                html= html + '<th>Birth Date</th>'
+                html= html + '</tr>'
+                html= html + '</thead>'
+                html= html + '<tobdy>'
+                var html_tr=''
+                    var html_tr='';
+                    for(i=0;i<data['response'].length;i++){
+
+                        html_tr=html_tr + '<tr>';
+                        html_tr=html_tr + '<td>'+ data['response'][i]['username']+ '</td>';
+                        html_tr=html_tr + '<td>'+ data['response'][i]['first_name']+ '</td>';
+                        html_tr=html_tr + '<td>'+ data['response'][i]['last_name']+ '</td>';
+                        html_tr=html_tr + '<td>'+ data['response'][i]['email']+ '</td>';
+                        html_tr=html_tr + '<td>'+ data['response'][i]['last_login']+ '</td>';
+                        html_tr=html_tr + '<td>'+ data['response'][i]['date_joined']+ '</td>';
+                        html_tr=html_tr + '<td>'+ data['response'][i]['phone_number']+ '</td>';
+                        html_tr=html_tr + '<td>'+ data['response'][i]['birthday']+ '</td>';
+                        html_tr=html_tr + '</tr>';
+
+                    }
+
+                html=html+html_tr
+                html= html + '</tobdy>'
+                html= html + '</table>'
+                //$("#customer_table").html(html);
+                $("#tableDiv").html(html);
+                //$("#customer_table").DataTable();
+                 $('#customer_table').DataTable({
+                        order: [[5, 'desc']],
+                  });
+
+                }
+             });
+
+}
+
+function append_customer(customer_id){
+    base_url='/api/customer/details?customer_id=' + customer_id;
+
+        $.ajax({
+            url : base_url,
+            success: function(data) {
+                    var html_tr='';
+                    // alert(data['customers'].length);
+
+                        html_tr=html_tr + '<tr>';
+                        html_tr=html_tr + '<td>'+ data['customer_id']+'</td>';
+                        html_tr=html_tr + '<td>'+ data['customer_name']+'</td>';
+                        html_tr=html_tr + '<td>'+ data['state']+'</td>';
+                        html_tr=html_tr + '<td>'+ data['city']+'</td>';
+                        html_tr=html_tr + '<td>'+ data['pincode']+'</td>';
+                        html_tr=html_tr + '</tr>';
+                        $("#customersortTable").append(html_tr);
+
+                    }
+             });
+
+}
+
+// For Customer table Search
+
+    // Have used search box ID
+function customer_search() {
+    var input = document.getElementById("cust-search");
+    var filter = input.value.toUpperCase();
+    var table = document.getElementById("customersortTable");
+    var trs = table.tBodies[0].getElementsByTagName("tr");
+
+    // Loop through first tbody's rows
+    for (var i = 0; i < trs.length; i++) {
+
+        // define the row's cells
+        var tds = trs[i].getElementsByTagName("td");
+
+        // hide the row
+        trs[i].style.display = "none";
+
+        // loop through row cells
+        for (var i2 = 0; i2 < tds.length; i2++) {
+
+        // if there's a match
+        if (tds[i2].innerHTML.toUpperCase().indexOf(filter) > -1) {
+
+            // show the row
+            trs[i].style.display = "";
+
+            // skip to the next row
+            continue;
+
+        }
+        }
+    }
+
+
+
+
+    }
+
+</script>
+
+<script>
+    function consignor_refresh(ConsignorID){
+        if(ConsignorID!='')
+        {
+
+            console.log('/api/customer/details?customer_id=' + ConsignorID);
+            base_url='/api/customer/details?customer_id=' + ConsignorID;
+            document.getElementById('loader').style.display = "block";
+            $.ajax({
+                url : base_url,
+                success: function(data) {
+                    $('#ConsignorName').val(data['address1']);
+                    $('#ConsignorAddress1').val(data['address1']);
+                    $('#ConsignorAddress2').val(data['address2']);
+                    $('#ConsignorCity').val(data['city']);
+                    $('#ConsignorState').val(data['state']);
+                    $('#ConsignorPinCode').val(data['pincode']);
+                    $('#ConsignorContact').val(data['contact_no']);
+                    $('#Source').val(data['city']);
+                    document.getElementById('loader').style.display = "none";
+
+                }
+            });
+        }
+
+    }
+
+    function consignee_refresh(ConsigneeID){
+        if(ConsigneeID!='')
+        {
+
+            //alert(document.getElementById('ConsigneeID').value);
+
+            console.log('/api/customer/details?customer_id=' + ConsigneeID);
+            base_url='/api/customer/details?customer_id=' + ConsigneeID;
+            document.getElementById('loader').style.display = "block";
+            $.ajax({
+                url : base_url,
+                success: function(data) {
+
+                    $('#ConsigneeName').val(data['customer_name']);
+                    $('#ConsigneeAddress1').val(data['address1']);
+                    $('#ConsigneeAddress2').val(data['address2']);
+                    $('#ConsigneeCity').val(data['city']);
+                    $('#ConsigneeState').val(data['state']);
+                    $('#ConsigneePinCode').val(data['pincode']);
+                    $('#ConsigneeContact').val(data['contact_no']);
+                    $('#Destination').val(data['city']);
+                    $('#Location').val(data['city']);
+                   document.getElementById('loader').style.display = "none";
+
+                }
+            });
+        }
+    }
+
+    function download_consignment(currElement){
+        var parentRowIndex = currElement.parentNode.parentNode.rowIndex;
+        docket_no=document.getElementById('sortTable').rows[parentRowIndex].cells[0].innerHTML.trim();
+        base_url='/download/docket?docket_no=' + docket_no;
+        var link = document.createElement('a');
+        link.href = base_url;
+        link.download = 'file.pdf';
+        link.dispatchEvent(new MouseEvent('click'));
+    }
+
+    function email_consignment(currElement){
+        var parentRowIndex = currElement.parentNode.parentNode.rowIndex;
+        docket_no=document.getElementById('sortTable').rows[parentRowIndex].cells[0].innerHTML.trim();
+        var base_url='/report/docket/email?docket_no=' + docket_no;
+            document.getElementById('loader').style.display = "block";
+            $.ajax({
+                url : base_url,
+                success: function(data) {
+                    if(data['errorcode']==0){
+                        alert('Email sent successfully!!!');
+
+                        //var base_url='/document/email/?text=' + 'Email sent successfully for '+document.getElementById('docket_nos').value +'!!!';
+                    }
+                    else{
+                        alert('Invalid email ID. Please  edit customer to update email id');
+                    }
+                    document.getElementById('loader').style.display = "none";
+
+
+
+                }
+
+            });
+    }
+
+    function EDD_Function(x)
+    {
+
+
+        var d = new Date(x);
+        d.setDate(d.getDate() + 7);
+        y=d.toISOString();
+        let isoDate = y;
+        z=isoDate.split("T")[0]
+        return z;
+    }
+
+    function today()
+    {
+
+
+        var d = new Date();
+        y=d.toISOString();
+        let isoDate = y;
+        z=isoDate.split("T")[0]
+        return z;
+    }
+
+</script>
+
+</html>
